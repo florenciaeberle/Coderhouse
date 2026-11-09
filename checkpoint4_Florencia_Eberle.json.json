@@ -1,0 +1,505 @@
+{
+  "name": "checkpoint4_Florencia_Eberle.json",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "simple": false,
+        "filters": {
+          "q": "Roble",
+          "readStatus": "both"
+        },
+        "options": {}
+      },
+      "id": "ed9c35eb-6351-474a-8c81-6b2eb2e223f5",
+      "name": "Correo nuevo en la casilla",
+      "type": "n8n-nodes-base.gmailTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        -480,
+        128
+      ],
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "Kgz6wnv1RAt0YreW",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": false,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "2271afa3-cca1-5a2c-a87d-dec9b82e9c4e",
+              "leftValue": "={{ $json.subject }}",
+              "rightValue": "Auto-reply",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            },
+            {
+              "id": "83d208d6-f149-5dff-8b61-c910c99e4561",
+              "leftValue": "={{ $json.subject }}",
+              "rightValue": "Out of office",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            },
+            {
+              "id": "0f4bf4f2-c5e1-5d27-aee9-95776d45f9b8",
+              "leftValue": "={{ $json.subject }}",
+              "rightValue": "Undeliverable",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            },
+            {
+              "id": "c76d4d63-07f1-51ce-a9c9-1f885dd2835e",
+              "leftValue": "={{ $json.subject }}",
+              "rightValue": "Fuera de la oficina",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            },
+            {
+              "id": "872cac5e-52e8-5199-aa8e-2e12e24e1453",
+              "leftValue": "={{ $json.subject }}",
+              "rightValue": "Respuesta automática",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            },
+            {
+              "id": "0d9842a8-41ad-57d1-a616-0bb6fb3cd213",
+              "leftValue": "={{ $json.from.value[0].address }}",
+              "rightValue": "no-reply",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            },
+            {
+              "id": "5901cf10-778f-5c12-9352-8e8106934a3d",
+              "leftValue": "={{ $json.from.value[0].address }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {
+          "ignoreCase": true
+        }
+      },
+      "id": "202505cb-6cab-45a9-bc99-1d437c2df9b5",
+      "name": "¿Correo automático o sin remitente?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -256,
+        128
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "959f6933-ab06-4b56-9e32-ba40037075b0",
+      "name": "No responder",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "authentication": "appToken",
+        "operation": "search",
+        "limit": 1,
+        "filterGroupsUi": {
+          "filterGroupsValues": [
+            {
+              "filtersUi": {
+                "filterValues": [
+                  {
+                    "propertyName": "firstname|string",
+                    "value": "={{ $('Limpiar el correo').first().json.Nombre }}"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "additionalFields": {}
+      },
+      "id": "741f0dce-6745-450c-83f4-4db22bd8344d",
+      "name": "Buscar contacto en HubSpot",
+      "type": "n8n-nodes-base.hubspot",
+      "typeVersion": 2.2,
+      "position": [
+        240,
+        144
+      ],
+      "alwaysOutputData": true,
+      "credentials": {
+        "hubspotAppToken": {
+          "id": "8ayalbkVOXkUa9tb",
+          "name": "HubSpot account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "74ffe015-e22f-5b78-8158-f578ec1e5327",
+              "leftValue": "={{ $json.id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "3940b297-d328-4cac-92fd-a1980381e715",
+      "name": "¿Ya está en HubSpot?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        464,
+        144
+      ]
+    },
+    {
+      "parameters": {
+        "authentication": "appToken",
+        "email": "={{ $('Limpiar el correo').first().json.From }}",
+        "additionalFields": {
+          "firstName": "={{ $('Limpiar el correo').first().json.Nombre }}"
+        },
+        "options": {}
+      },
+      "id": "45797483-b3ce-4618-92bd-5692091a0821",
+      "name": "Crear contacto en HubSpot",
+      "type": "n8n-nodes-base.hubspot",
+      "typeVersion": 2.2,
+      "position": [
+        672,
+        304
+      ],
+      "credentials": {
+        "hubspotAppToken": {
+          "id": "8ayalbkVOXkUa9tb",
+          "name": "HubSpot account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Preparás borradores de respuesta para la casilla de soporte de Muebles Roble, una mueblería familiar de Córdoba. Julián, del equipo, revisa cada borrador antes de enviarlo.\nUsá SOLO estos datos de la tienda:\n- Showroom: lunes a viernes de 9 a 18, sábados de 9 a 13.\n- Precios: mesa de comedor Roble 160 cm $890.000; silla Nórdica $120.000; sofá Lino 3 cuerpos $1.450.000; rack TV Roble 180 $520.000; escritorio Home Office $380.000.\n- Envíos: Córdoba capital de 48 a 72 h hábiles, gratis desde $500.000. Interior del país de 5 a 7 días hábiles, con costo según destino.\n- Devoluciones: 10 días corridos desde la entrega, sin uso y en su embalaje original. Los muebles a medida no tienen devolución.\n- Garantía: 12 meses en estructura y 6 meses en tapizados, por falla de fabricación.\n- Pagos: hasta 12 cuotas sin interés con tarjetas bancarias seleccionadas; 10% de descuento por transferencia.\n\nReglas:\n- Español rioplatense, cálido y directo. Saludá por el nombre si lo tenés. Máximo 5 oraciones.\n- Si el cliente necesita algo que no está en estos datos (presupuesto con descuento por cantidad, estado de un pedido, un reclamo), no lo inventes: decí que Julián lo revisa y le responde hoy.\n- Escribí solo el cuerpo del correo, sin asunto. Firmá \"Equipo de Muebles Roble\". Sin emojis.\n\nNombre del cliente: {{ $('Limpiar el correo').first().json.Nombre }}\nAsunto: {{ $('Limpiar el correo').first().json.Subject }}\nCorreo del cliente:\n###\n{{ $('Limpiar el correo').first().json.BodyText }}\n###",
+        "batching": {}
+      },
+      "id": "22e19357-425b-4157-9f85-11f53d209c3f",
+      "name": "Redactar respuesta",
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        896,
+        128
+      ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000
+    },
+    {
+      "parameters": {
+        "model": "openai/gpt-oss-120b",
+        "options": {
+          "temperature": 0.2
+        }
+      },
+      "id": "e467a10b-a5b6-4cc6-a3c3-b18aa0e9acd7",
+      "name": "Groq Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        896,
+        352
+      ],
+      "credentials": {
+        "groqApi": {
+          "id": "ijKnXKgxoYOgzZwt",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "draft",
+        "subject": "=Re: {{ $('Limpiar el correo').first().json.Subject.replace(/^re:\\s*/i, '') }}",
+        "message": "={{ $('Redactar respuesta').first().json.text }}",
+        "options": {
+          "threadId": "={{ $('Limpiar el correo').item.json.ThreadId }}",
+          "sendTo": "={{ $('Limpiar el correo').first().json.From }}"
+        }
+      },
+      "id": "5f258c60-86a8-4950-be25-6e71e08ed0e2",
+      "name": "Guardar borrador en Gmail",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1232,
+        128
+      ],
+      "webhookId": "a9851536-b300-4211-b16f-8f516f3d81aa",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "Kgz6wnv1RAt0YreW",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "99930624-352b-45d9-8162-0dc4b8f2fd59",
+              "name": "From",
+              "value": "={{ $json.from.value[0].address }}",
+              "type": "string"
+            },
+            {
+              "id": "1576ecb3-af31-4f44-b151-d814732914eb",
+              "name": "Nombre",
+              "value": "={{ $json.from.value[0].name }}",
+              "type": "string"
+            },
+            {
+              "id": "3f303ae8-58ee-4b7d-8537-3b830118eb03",
+              "name": "Subject",
+              "value": "={{ $json.subject }}",
+              "type": "string"
+            },
+            {
+              "id": "bd027826-d8f9-4504-9130-c21e4a490433",
+              "name": "ThreadId",
+              "value": "={{ $('Correo nuevo en la casilla').item.json.threadId }}",
+              "type": "string"
+            },
+            {
+              "id": "342bd797-989b-4596-b25c-e8a9478a4016",
+              "name": "",
+              "value": "",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        0,
+        144
+      ],
+      "id": "1a75c8bb-9890-4ef9-9357-de2535ea172e",
+      "name": "Limpiar el correo"
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "C0BHN8LN40Y",
+          "mode": "list",
+          "cachedResultName": "todo-ia"
+        },
+        "text": "=📩 *Correo nuevo en la casilla de soporte*\n\n👤 *Cliente:* {{ $('Limpiar el correo').first().json.Nombre }} ({{ $('Limpiar el correo').first().json.From }})\n📌 *Asunto:* {{ $('Limpiar el correo').first().json.Subject }}\n📇 *HubSpot:* {{ $('Crear contacto en HubSpot').isExecuted ? '✨ contacto nuevo' : '✔️ ya era contacto' }}\n📝 *Estado:* Borrador listo para revisar en Gmail.",
+        "otherOptions": {
+          "includeLinkToWorkflow": false
+        }
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.5,
+      "position": [
+        1424,
+        128
+      ],
+      "id": "1ff0a889-65d2-4e2b-8714-ba3d61137af6",
+      "name": "Avisar en Slack",
+      "webhookId": "2aabec08-b171-463b-8f19-4d26f770d051",
+      "credentials": {
+        "slackOAuth2Api": {
+          "id": "tZV09gcEZxjKh9iK",
+          "name": "Slack account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Correo nuevo en la casilla": {
+      "main": [
+        [
+          {
+            "node": "¿Correo automático o sin remitente?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "¿Correo automático o sin remitente?": {
+      "main": [
+        [
+          {
+            "node": "No responder",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Limpiar el correo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar contacto en HubSpot": {
+      "main": [
+        [
+          {
+            "node": "¿Ya está en HubSpot?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "¿Ya está en HubSpot?": {
+      "main": [
+        [
+          {
+            "node": "Redactar respuesta",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Crear contacto en HubSpot",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Crear contacto en HubSpot": {
+      "main": [
+        [
+          {
+            "node": "Redactar respuesta",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Redactar respuesta",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Redactar respuesta": {
+      "main": [
+        [
+          {
+            "node": "Guardar borrador en Gmail",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Guardar borrador en Gmail": {
+      "main": [
+        [
+          {
+            "node": "Avisar en Slack",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Limpiar el correo": {
+      "main": [
+        [
+          {
+            "node": "Buscar contacto en HubSpot",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "b5dc0da6-652e-4147-9d7c-58c4c8fa60ea",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "8d039c16c5508e799fb7e4b85f17f6d737157d3573002758ec967b46cdac6cbe"
+  },
+  "nodeGroups": [],
+  "id": "nFSaf6aNIMN0rjZv",
+  "tags": []
+}
